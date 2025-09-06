@@ -33,20 +33,38 @@ The remaining steps will vary depending on if backups are available
 
 ### Installation 
 
-1. Install k3s on the cluster by cloning k3s-ansbile, setting up the inventory, then running the `site` playbook. Follow the [k3s-ansbile docs](https://github.com/k3s-io/k3s-ansible) for full instructions
-    ```sh
-    ansible-vault create vault-globals.yml
-    ansible-vault edit vault-globals.yml 
-    # Add `k3s_token: theTokenHere` to the vault, see inventory.yml for how to generate
-    ansible-playbook -i inventory.yml playbooks/site.yml --ask-vault-pass -e @vault-globals.yml
-    ```
+1. Install k3s using `k3s-ansbile`. Follow the [k3s-ansbile docs](https://github.com/k3s-io/k3s-ansible) for full instructions
+    * Clone the `k3s-ansible` repo
+    * Set up `inventory.yml`. I had to add some extra args:
+        ```yaml
+        k3s_cluster:
+          children:
+            server:
+            hosts:
+              node1.mydomain.tld:
+                extra_server_args: "--tls-san node1.mydomain.tld --disable=local-storage"
+              node2.mydomain.tld:
+                extra_server_args: "--tls-san node2.mydomain.tld --disable=local-storage"
+              node3.mydomain.tld:
+                extra_server_args: "--tls-san node3.mydomain.tld --disable=local-storage"
+        ```
+    * Create Kubernetes token and store it in an `ansible-vault` and run the `site` playbook
+        ```sh 
+        ansible-vault create vault-globals.yml
+        ansible-vault edit vault-globals.yml 
+        # Add `k3s_token: theTokenHere` to the vault, see inventory.yml for how to generate
+        ```
+    * Run the `site` playbook
+        ```sh
+        ansible-playbook -i inventory.yml playbooks/site.yml --ask-vault-pass -e @vault-globals.yml
+        ```
 1. Install ArgoCD on the cluster with Helm
     ```sh
     helm repo add argo https://argoproj.github.io/argo-helm
     helm repo update
     helm upgrade --install argocd argo/argo-cd --version 8.1.3 -n argocd --create-namespace
     ```
-1. Clone this repo and `cd` into it
+1. Clone this repo and `cd` to the root
 1. Copy the bootstrap values file. Edit it to add backblaze and Gitea credentials (see [Longhorn docs here](https://longhorn.io/docs/1.9.0/snapshots-and-backups/backup-and-restore/set-backup-target/#set-the-default-backup-target-using-a-manifest-yaml-file))
     ```sh
     cp tools/bootstrap/example-values.yaml tools/bootstrap/values.yaml
