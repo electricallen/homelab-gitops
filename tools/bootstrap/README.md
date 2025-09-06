@@ -48,6 +48,14 @@ The remaining steps will vary depending on if backups are available
               node3.mydomain.tld:
                 extra_server_args: "--tls-san node3.mydomain.tld --disable=local-storage"
         ```
+    * Add sudo passwords to vaults in the `host_vars` directory. Repeat for each node
+        ```yaml
+        mkdir host_vars/node1.yourdomain.tld
+        ansible-vault create host_vars/node1.yourdomain.tld/vault.yml
+        # Use the same password for all vaults
+        # Add this line:
+        # ansible_become_password: your-node-1-password-here
+        ```
     * Create Kubernetes token and store it in an `ansible-vault` and run the `site` playbook
         ```sh 
         ansible-vault create vault-globals.yml
