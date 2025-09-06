@@ -40,13 +40,13 @@ The remaining steps will vary depending on if backups are available
         k3s_cluster:
           children:
             server:
-            hosts:
-              node1.mydomain.tld:
-                extra_server_args: "--tls-san node1.mydomain.tld --disable=local-storage"
-              node2.mydomain.tld:
-                extra_server_args: "--tls-san node2.mydomain.tld --disable=local-storage"
-              node3.mydomain.tld:
-                extra_server_args: "--tls-san node3.mydomain.tld --disable=local-storage"
+              hosts:
+                node1.mydomain.tld:
+                  extra_server_args: "--tls-san node1.mydomain.tld --disable=local-storage"
+                node2.mydomain.tld:
+                  extra_server_args: "--tls-san node2.mydomain.tld --disable=local-storage"
+                node3.mydomain.tld:
+                  extra_server_args: "--tls-san node3.mydomain.tld --disable=local-storage"
         ```
     * Add sudo passwords to vaults in the `host_vars` directory. Repeat for each node
         ```yaml
