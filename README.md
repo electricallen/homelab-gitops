@@ -140,7 +140,12 @@ Some applications will require configuration for secrets and ingresses:
     * If you are not using the `vaultwardenVolumeInit` tool:
         * Create secret resources for the admin password. See the [tool README](tools/vaultwardenVolumeInit/README.md#usage) for details
         * Add a service account to Vaultwarden. See the [vaultwardenVolumeInit](tools/nextcloudVolumeInit/README.md) readme for details
-    * Some secrets need to be created in Vaultwarden and available to the service account. Once the secrets have been addedm they can be referenced in `ExternalSecret` manifests by referencing the URL itemId parameter: `https://myvault.com/#/vault?type=login&itemId=........-....-....-....-............` [See here](https://external-secrets.io/latest/examples/bitwarden/)
+    * Some secrets need to be created in Vaultwarden and available to the service account. Once the secrets have been added, they can be referenced in `ExternalSecret` manifests by referencing the URL itemId parameter:
+        ```
+        https://myvault.com/#/vault?type=login&itemId=aaaabbbb-cccc-dddd-eeee-000011112222
+        ```
+        * [See here](https://external-secrets.io/latest/examples/bitwarden/)
+        * I have found it useful to store these secrets in a dedicated org, accessible to both the service account and your personal account. This allows you to administer secrets without changing to the service account.
 
 ## Further edits
 
