@@ -187,3 +187,28 @@ This repo does not cover host OS-level setup, including disk management. The ste
 * In Longhorn GUI, `Node` tab, Operation menu on right, `Edit Node and Disks`, add disk at bottom
     * Use `Block` disk type
     * Use the mount point `/mnt/longhorn` NOT `/dev/sdb`
+
+## Appendix B: Expanding volumes 
+
+Longhorn makes use of the k3s server node's logical volume. The partition and LV may need to be expanded on the OS to fill the disk:
+
+1. Identify the device and partition names. Here is an example of an under provisioned disk - `ubuntu--vg-ubuntu--lv` is only 100GB on a 980GB disk:
+    ```sh
+    $ lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT
+    NAME                       SIZE FSTYPE      MOUNTPOINT
+    sda                        980G             
+    ├─sda1                       1M             
+    ├─sda2                       2G ext4        /boot
+    └─sda3                     978G LVM2_member 
+    └─ubuntu--vg-ubuntu--lv  100G ext4        /
+    ```
+1. Expand the logical volume:
+    ```dh
+    sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+    ```
+1. Resize the file system
+    ```sh
+    sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+    ```
+
+The Longhorn dashboard should now show the full disk size on the Nodes tab.
