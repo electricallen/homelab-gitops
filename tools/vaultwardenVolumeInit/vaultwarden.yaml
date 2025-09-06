@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vaultwarden-seeder
+  namespace: vaultwarden
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    metadata:
+      labels:
+        name: vaultwarden-seeder
+    spec:
+      containers:
+      - name: shell
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "Waiting for data files. Run:"
+          echo 'PODNAME=$(kubectl get pods -l name=vaultwarden-seeder -o jsonpath='{.items[0].metadata.name}')'
+          echo 'kubectl -n vaultwarden cp ./volumeSeeders/vaultwardenData/. vaultwarden/vaultwarden-seeder:/data/'
+          while [ ! -f /data/db.sqlite3 ]; do
+            sleep 5
+          done
+          echo "/data detected. Printing contents"
+          ls -lah /data
+          echo "Job complete"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: vaultwarden-data
+      restartPolicy: Never
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vaultwarden-data
+  namespace: vaultwarden
+  labels:
+    component: vaultwarden
+    instance: vaultwarden
+    name: vaultwarden
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: longhorn
+  volumeMode: Filesystem

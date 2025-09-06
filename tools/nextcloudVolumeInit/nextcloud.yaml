@@ -1,0 +1,195 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nextcloud-db-seeder
+  namespace: nextcloud
+spec:
+  containers:
+  - name: seeder
+    image: bitnami/mariadb:11.4.6-debian-12-r0
+    env:
+    - name: MARIADB_USER
+      value: nextcloud
+    - name: MARIADB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-db-credentials
+          key: mariadb-password
+    - name: MARIADB_ROOT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-db-credentials
+          key: mariadb-root-password
+    volumeMounts:
+    - name: data
+      mountPath: /bitnami/mariadb
+    readinessProbe:
+      exec:
+        command:
+          - /bin/bash
+          - '-ec'
+          - mariadb-admin ping -uroot -p"${MARIADB_ROOT_PASSWORD}"
+  securityContext:
+    fsGroup: 1001
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: nextcloud-db
+  restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nextcloud-data-seeder
+  namespace: nextcloud
+  labels:
+    app.kubernetes.io/name: nextcloud-data-seeder
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      containers:
+      - name: rsync-job
+        image: nextcloud:31.0.8
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          apt-get update && apt-get install sshpass -y && \
+          export SSH_USER=$SSH_USER
+          export SSH_HOST=$SSH_HOST
+          export SRC_PATH=$SRC_PATH
+          export SSHPASS=$SSHPASS
+          echo Copying files, this may take a while...
+          sshpass -e rsync -Aatvxz \
+            --exclude 'config/config.php' \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            --rsync-path="sudo rsync" \
+            $SSH_USER@$SSH_HOST:$SRC_PATH/ /var/www/html \
+          || { echo "rsync Failed!"; exit 1;}
+          echo "Waiting for new config file. Run:"
+          echo PODNAME='$(kubectl -n nextcloud get pods -l batch.kubernetes.io/job-name=nextcloud-data-seeder -o jsonpath='\''{.items[0].metadata.name}'\'')'
+          echo 'kubectl cp volumeSeeders/config.php nextcloud/$PODNAME:/var/www/html/config/config.php'
+          while [ ! -f /var/www/html/config/config.php ]; do
+            sleep 5
+          done
+          echo "config.php detected, chowning"
+          chown 33:33 /var/www/html/config/config.php
+          chmod 640 /var/www/html/config/config.php
+          echo "Data directory migration finished, job complete"
+        env:
+          - name: SSHPASS
+            valueFrom:
+              secretKeyRef:
+                name: nextcloud-seeder-credentials
+                key: password
+          - name: SSH_USER
+            valueFrom:
+              secretKeyRef:
+                name: nextcloud-seeder-credentials
+                key: username
+          - name: SSH_HOST
+            valueFrom:
+              secretKeyRef:
+                name: nextcloud-seeder-credentials
+                key: host
+          - name: SRC_PATH
+            valueFrom:
+              secretKeyRef:
+                name: nextcloud-seeder-credentials
+                key: path
+        volumeMounts:
+        - name: data
+          mountPath: /var/www/html
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: nextcloud-data
+      restartPolicy: Never
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: nextcloud-seeder-credentials
+  namespace: nextcloud
+spec:
+  target:
+    name: nextcloud-seeder-credentials
+    deletionPolicy: Delete
+    template:
+      type: Opaque
+      data:
+        username: '{{ .username }}'
+        password: '{{ .password }}'
+        host: '{{ .host }}'
+        path: '{{ .path }}'
+  data:
+    - secretKey: username
+      sourceRef:
+        storeRef:
+          name: bitwarden-login
+          kind: ClusterSecretStore
+      remoteRef:
+        key: aaaabbbb-cccc-dddd-eeee-000011112222
+        property: username
+    - secretKey: password
+      sourceRef:
+        storeRef:
+          name: bitwarden-login
+          kind: ClusterSecretStore
+      remoteRef:
+        key: aaaabbbb-cccc-dddd-eeee-000011112222
+        property: password
+    - secretKey: host
+      sourceRef:
+        storeRef:
+          name: bitwarden-fields
+          kind: ClusterSecretStore
+      remoteRef:
+        key: aaaabbbb-cccc-dddd-eeee-000011112222
+        property: host
+    - secretKey: path
+      sourceRef:
+        storeRef:
+          name: bitwarden-fields
+          kind: ClusterSecretStore
+      remoteRef:
+        key: aaaabbbb-cccc-dddd-eeee-000011112222
+        property: path
+---
+# DATABASE VOLUME
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nextcloud-db
+  namespace: nextcloud
+  labels:
+    app.kubernetes.io/component: nextcloud
+    app.kubernetes.io/instance: nextcloud
+    app.kubernetes.io/name: nextcloud
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: longhorn
+  volumeMode: Filesystem
+---
+# DATA VOLUME
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nextcloud-data
+  namespace: nextcloud
+  labels:
+    app.kubernetes.io/component: nextcloud
+    app.kubernetes.io/instance: nextcloud
+    app.kubernetes.io/name: nextcloud
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: longhorn-non-replicated
+  volumeMode: Filesystem

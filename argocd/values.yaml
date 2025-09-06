@@ -1,0 +1,19 @@
+global:
+  domain: argo.mydomain.tld
+
+configs:
+  params:
+    server.insecure: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      spec.ingressClassName: traefik
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    extraTls:
+      - hosts:
+        - argo.mydomain.tld
+        secretName: argocd-tls

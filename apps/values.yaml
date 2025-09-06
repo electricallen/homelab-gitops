@@ -1,0 +1,65 @@
+config:
+  spec:
+    destination:
+      server: https://kubernetes.default.svc
+    source:
+      repoURL: http://gitea-http.gitea.svc:3000/gitea_admin/homelab-gitops.git
+      targetRevision: HEAD
+
+applications:
+# Raw manifests or local Helm charts
+  - name: cert-manager-manifests
+    namespace: cert-manager
+    path: cert-manager
+  - name: longhorn-manifests
+    namespace: longhorn-system 
+    path: longhorn
+  - name: external-secrets-manifests
+    namespace: vaultwarden
+    path: external-secrets
+  - name: nextcloud-manifests
+    namespace: nextcloud
+    path: nextcloud
+# External Helm chart + Local values; specifying `sources` will create a multi-source application 
+#   https://argo-cd.readthedocs.io/en/latest/user-guide/multiple_sources/
+  - name: argocd
+    sources:
+      - repoURL: 'https://argoproj.github.io/argo-helm'
+        chart: argo-cd
+        targetRevision: 8.1.3
+  - name: cert-manager
+    sources:
+      - repoURL: 'https://charts.jetstack.io'
+        chart: cert-manager
+        targetRevision: 'v1.18.2'
+  - name: gitea
+    sources:
+      - repoURL: 'https://dl.gitea.com/charts/'
+        chart: gitea
+        targetRevision: 12.1.2
+  - name: longhorn
+    namespace: longhorn-system
+    sources:
+      - repoURL: 'https://charts.longhorn.io'
+        chart: longhorn
+        targetRevision: 1.9.1
+  - name: external-secrets
+    sources:
+      - repoURL: 'https://charts.external-secrets.io'
+        chart: external-secrets
+        targetRevision: 0.19.0
+  - name: vaultwarden
+    sources:
+      - repoURL: 'https://guerzon.github.io/vaultwarden'
+        chart: vaultwarden
+        targetRevision: 0.32.4
+  - name: nextcloud
+    sources:
+      - repoURL: 'https://nextcloud.github.io/helm'
+        chart: nextcloud
+        targetRevision: 7.0.0
+  - name: ignition
+    sources: 
+      - repoURL: 'https://electricallen.github.io/ignition-helm'
+        chart: ignition
+        targetRevision: 0.1.10

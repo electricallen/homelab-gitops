@@ -1,0 +1,63 @@
+# Accept the EULA https://inductiveautomation.com/ignition/license
+eula:
+  accepted: true
+
+# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+replicaCount: 1
+
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  repository: inductiveautomation/ignition
+  tag: 8.1.48
+  pullPolicy: IfNotPresent
+
+# Environment variables here are set for the Ignition Gateway, add as needed
+# More information can be found here: https://www.docs.inductiveautomation.com/docs/8.1/platform/docker-image#environment-variables
+env:
+  IGNITION_EDITION: "standard" 
+  GATEWAY_ADMIN_USERNAME: "admin"
+  GATEWAY_ADMIN_PASSWORD: "password"
+  DISABLE_QUICKSTART: "true" 
+
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8088
+    - name: https
+      protocol: TCP
+      port: 8043
+    - name: gan
+      protocol: TCP
+      port: 8060
+
+# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  portName: http
+  hosts:
+    - host: ignition.mydomain.tld
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - ignition.mydomain.tld
+      secretName: ignition-tls
+
+# Additional volumeClaimTemplates on the output Deployment definition.
+volumeClaimTemplates: 
+- metadata:
+    name: data
+  spec:
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: 1Gi
+    storageClassName: "longhorn-non-replicated"

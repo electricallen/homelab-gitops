@@ -1,0 +1,61 @@
+image:
+  tag: '31.0.8'
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  tls:
+    - secretName: nextcloud-tls
+      hosts:
+        - nextcloud.mydomain.tld
+  path: /
+  pathType: Prefix
+
+nextcloud:
+  host: nextcloud.mydomain.tld
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-admin-credentials
+    usernameKey: username
+    passwordKey: password
+    # tokenKey: ""
+    # smtpUsernameKey: smtp-username
+    # smtpPasswordKey: smtp-password
+    # smtpHostKey: smtp-host
+
+cronjob:
+  enabled: true
+
+persistence:
+  enabled: true
+  existingClaim: nextcloud-data
+
+internalDatabase:
+  enabled: false
+
+internalDatabase:
+  enabled: false
+
+externalDatabase:
+  enabled: true
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-db-credentials
+    usernameKey: username
+    passwordKey: mariadb-password
+
+## ref: https://github.com/bitnami/charts/tree/main/bitnami/mariadb
+mariadb:
+  enabled: true
+  # see: https://github.com/bitnami/charts/tree/main/bitnami/mariadb#global-parameters
+  auth:
+    existingSecret: nextcloud-db-credentials
+  architecture: standalone
+  primary:
+    persistence:
+      enabled: true
+      existingClaim: nextcloud-db

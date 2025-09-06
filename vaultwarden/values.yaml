@@ -1,0 +1,25 @@
+signupsAllowed: false
+invitationsAllowed: true
+
+domain: http://vaultwarden.mydomain.tld
+
+storage:
+  existingVolumeClaim:
+    claimName: vaultwarden-data
+
+adminToken:
+  existingSecret: vaultwarden-admin-token
+  existingSecretKey: admin-token
+
+ingress:
+  enabled: true
+  class: traefik
+  additionalAnnotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  tls: true
+  tlsSecret: vaultwarden-tls
+  hostname: vaultwarden.mydomain.tld
+  path: /
+  pathType: Prefix

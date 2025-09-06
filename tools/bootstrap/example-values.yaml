@@ -1,0 +1,9 @@
+gitea:
+  password: your-secure-password
+backblaze:
+  # The s3 API uses a region, but Backblaze does not. Any text can be used in the Region field. 
+  #   Example works for bucket `myBucket` with `longhorn` folder on `us-east-005.backblazeb2.com`
+  AWS_ENDPOINTS: s3.us-east-005.backblazeb2.com
+  AWS_ACCESS_KEY_ID: your-key-id  
+  AWS_SECRET_ACCESS_KEY: your-application-key  
+  s3Url: s3://myBucket@placeHolderRegion/longhorn # `placeHolderRegion` is ignored! 

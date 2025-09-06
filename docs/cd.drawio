@@ -1,0 +1,78 @@
+<mxfile host="65bd71144e">
+    <diagram id="gSqIdxtODcu9TYRzWTC7" name="Page-1">
+        <mxGraphModel dx="853" dy="542" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="25" value="Kubernetes Cluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#006EAF;verticalAlign=top;spacing=-2;" vertex="1" parent="1">
+                    <mxGeometry x="137.25" y="90" width="252.75" height="290" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="Gitea Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;verticalAlign=top;spacing=-2;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="110" width="150" height="260" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="homelab-gitops Repo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#647687;fontColor=#ffffff;strokeColor=#314354;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="130" width="130" height="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="170" y="160" width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="apps" style="rounded=1;whiteSpace=wrap;html=1;align=right;" vertex="1" parent="17">
+                    <mxGeometry width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=light-dark(#F0A30A,#FFFF00);labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.folder;fontColor=#000000;" vertex="1" parent="17">
+                    <mxGeometry x="10" y="5" width="23" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="170" y="240" width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="cert-manager" style="rounded=1;whiteSpace=wrap;html=1;align=right;" vertex="1" parent="18">
+                    <mxGeometry width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=light-dark(#F0A30A,#FFFF00);labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.folder;fontColor=#000000;" vertex="1" parent="18">
+                    <mxGeometry x="10" y="5" width="23" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="..." style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=light-dark(#000000,#000000);fontSize=23;" vertex="1" parent="1">
+                    <mxGeometry x="195" y="270" width="60" height="10" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=light-dark(#000000,#CC0000);" edge="1" parent="1" source="26" target="36">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="vaultwarden&lt;br&gt;&lt;br&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(204, 0, 0));&quot;&gt;values.yaml&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=right;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="170" y="290" width="110" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=light-dark(#F0A30A,#FFFF00);labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.folder_open;fontFamily=Helvetica;fontSize=12;fontColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="180" y="295" width="26" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=#314354;fillColor=#647687;shape=mxgraph.azure.file_2;pointerEvents=1;shadow=0;dashed=0;sketch=0;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="188.5" y="320" width="17.5" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="170" y="200" width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="argocd" style="rounded=1;whiteSpace=wrap;html=1;align=right;" vertex="1" parent="29">
+                    <mxGeometry width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=light-dark(#F0A30A,#FFFF00);labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.folder;fontColor=#000000;" vertex="1" parent="29">
+                    <mxGeometry x="10" y="5" width="23" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="User edits" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+                    <mxGeometry x="80" y="300" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=light-dark(#000000,#CC0000);" edge="1" parent="1" target="28">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="110" y="330" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="39" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=light-dark(#000000,#CC0000);" edge="1" parent="1" source="36" target="38">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="ArgoCD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fa6800;fontColor=#000000;strokeColor=#C73500;verticalAlign=top;spacing=-2;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="295" width="70" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="Vaultwarden&lt;br&gt;resource definitions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;verticalAlign=top;spacing=-2;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="200" width="70" height="50" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

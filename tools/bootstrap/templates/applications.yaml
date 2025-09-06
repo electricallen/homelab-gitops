@@ -1,0 +1,85 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: longhorn
+    repoURL: https://charts.longhorn.io
+    targetRevision: 1.9.1
+    helm:
+      releaseName: longhorn
+      parameters:
+      - name: preUpgradeChecker.jobEnabled
+        value: "false"
+      - name: defaultBackupStore.backupTargetCredentialSecret
+        value: longhorn-backblaze-credentials
+      - name: defaultBackupStore.backupTarget
+        value: {{ .Values.backblaze.s3Url }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitea
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: gitea
+    helm:
+      parameters:
+      - name: global.storageClass
+        value: longhorn-non-replicated
+      - name: gitea.admin.existingSecret
+        value: gitea-admin-secret
+      - name: gitea.admin.passwordMode
+        value: keepUpdated
+      - name: persistence.size
+        value: 5Gi
+      - name: persistence.volumeName
+        value: pvc-gitea-shared-storage
+      - name: postgresql.primary.persistence.existingClaim
+        value: pvc-data-gitea-postgresql
+      - name: postgresql-ha.enabled
+        value: 'false'
+      - name: postgresql.enabled
+        value: 'true'
+      - name: postgresql.primary.persistence.size
+        value: 5Gi
+      - name: valkey-cluster.enabled
+        value: 'false'
+      - name: valkey.enabled
+        value: 'true'
+      - name:  global.postgresql.auth.postgresPassword
+        value: gitea
+    repoURL: https://dl.gitea.com/charts/
+    targetRevision: 12.1.2
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gitea
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea:3000/gitea_admin/homelab-gitops.git
+    targetRevision: HEAD
+    path: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd

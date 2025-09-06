@@ -1,0 +1,47 @@
+global:
+  storageClass: "longhorn-non-replicated"
+
+ingress:
+  enabled: true
+  className: traefik
+  pathType: Prefix
+  annotations: 
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  hosts:
+    - host: git.mydomain.tld
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - git.mydomain.tld
+      secretName: git-tls
+
+gitea:
+  admin:
+    existingSecret: gitea-admin-secret
+    passwordMode: keepUpdated
+
+persistence:
+  size: 5Gi
+  volumeName: pvc-gitea-shared-storage
+
+postgresql-ha:
+  enabled: false
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      size: 5Gi
+      existingClaim: pvc-data-gitea-postgresql
+  global:
+    postgresql:
+      auth:
+        postgresPassword: gitea
+
+valkey-cluster:
+  enabled: false
+valkey:
+  enabled: true
