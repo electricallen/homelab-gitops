@@ -55,30 +55,24 @@ Both of these steps can be undone once the data has been copied to the Longhorn 
     ```sh
     scp user@host.domain.tld:/home/user/nextcloud/db/nextcloud-sqlbkp.bak ./
     ```
+1. Create a new `config.php` file in this directory. This should be very similar to the existing config file. Consider only editing the trusted domains, and if a different hostname is used. In particular, these fields should remain the same:
+    * `installed`
+    * `instanceid`
+    * `passwordsalt`
+    * `secret`
+    * `data-fingerprint`
+    * `config.php` was a source of many issues in my testing. Be very careful and if there are issues with the migration review `config.php` first. See [Further Troubleshooting](#further-troubleshooting)
 1. Run `sh nextcloud.sh`. This script does the following:
     * Applies the manifest `nextcloud.yaml`
     * Copies `nextcloud-sqlbkp.bak` into the DB seeder pod
     * Runs database restore commands
     * Copies `config.php` into the data volume
     * Cleans up unused resources
-1. For the database restore, you should see output like this:
+1. For the database restore, you should see this line:
     ```sh
-    # sh nextcloud.sh           
-    Applying manifest...
-    pod/nextcloud-seeder created
-    persistentvolumeclaim/nextcloud-db created
-    Manifest applied. Waiting for seeder pod to be ready...
-    pod/nextcloud-seeder condition met
-    Seeder pod started. Copying database backup file...
-    File copied. Restoring database...
-    --------------
-    DROP DATABASE nextcloud
-    --------------
-
-    ERROR 1008 (HY000) at line 1: Can't drop database 'nextcloud'; database doesn't exist
     Database restored successfully
     ```
-1. During the data restore, you'll see each filename printed
+1. During the data restore, you'll see each filename printed. If the data restore shows an rsync error, check for any open ssh sessions on that host and run the script again.
 1. Sync the NextCloud ArgoCD application using the GUI or from the CLI:
     ```sh
     argocd login <host>.<domain>.<tld>
@@ -105,7 +99,7 @@ Both of these steps can be undone once the data has been copied to the Longhorn 
 If there are any issues with the migration process, it is likely related to the `config.php` file. NextCloud file systems are very sensitive to permissions, and the errors shown can be confusing. Here are some issues I've ran into:
 
 1. `config.php`
-    * Must have the line `'installed' => true,`, otherwise an installation will be attempted
+        * * Must have the line `'installed'
     * Must have at least `localhost` and the ingress URL added to `trusted_domains`. Somewhat confusingly, the liveness probe uses the ingress URL rather than a Kubernetes address. This means the pod will fail to start if the ingress name isn't available over DNS and included in `trusted_domains`
     * `instanceid`, `passwordsalt`, `secret`, and `data-fingerprint` should all match the source machine's `config.php` file exactly
     * Database settings must also match. If the `mariadb-isalive` init container is completing but the pod is attempting an install, it may be due to a mismatched password. You can test the `nextcloud` account password using:

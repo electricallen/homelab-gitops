@@ -15,7 +15,7 @@ mariadb -h localhost -u root -p$MARIADB_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES O
 mariadb -h localhost -u root -p$MARIADB_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
 mariadb -h localhost -u root -p$MARIADB_ROOT_PASSWORD nextcloud < /tmp/nextcloud-sqlbkp.bak
 if [ -z "$(mariadb -h localhost -u root -p$MARIADB_ROOT_PASSWORD -e "USE nextcloud; SHOW TABLES;")" ]; then
-    echo "No tables found!
+    echo No tables found!
     exit 1
 else
     echo "Database restored successfully"

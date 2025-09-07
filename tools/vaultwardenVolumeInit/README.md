@@ -4,8 +4,7 @@ Tool for initializing a Longhorn volume with data from an existing Vaultwarden s
 
 ## Required Items
 * A service account (See below)
-* Backup of the `/data` directory stored at `./vaultwardenData`
-    * If this is on another server somewhere, you could retrieve it with EG `scp -r user@your.server.example.com:/path/to/data ./vaultwardenData`
+* Backup of the Vaultwarden server's `/data` directory 
 
 ### Creating a service account
 
@@ -21,8 +20,16 @@ In the existing environment:
 ## Usage
 
 1. `cd` to the directory with this README
-1. Create a `secret.yaml` file, then edit it to add the admin token and service account credentials:
+1. Create a `secrets.yaml` file, then edit it to add the admin token and service account credentials:
     ```yaml
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+    labels:
+        kubernetes.io/metadata.name: vaultwarden
+        name: vaultwarden
+    name: vaultwarden
+    ---
     # Vaultwarden Admin Token
     apiVersion: v1
     kind: Secret
@@ -50,15 +57,11 @@ In the existing environment:
     ```
 1. Create the new secrets
     ```sh
-    kubectl apply -f secret.yaml
+    kubectl apply -f secrets.yaml
     ```
-1. Place backup data at `./vaultwardenData`
-1. 
+1. Place backup data at `./vaultwardenData`. If this is on another server somewhere, you could retrieve it with EG `scp -r user@your.server.example.com:/path/to/data ./vaultwardenData`
+1. Execute the tool
     ```sh
-    kubectl apply -f vaultwarden.yaml && 
-    kubectl -n vaultwarden wait --for=condition=ready pod -l name=vaultwarden-seeder --timeout=600s &&
-    PODNAME=$(kubectl get pods -l name=vaultwarden-seeder -o jsonpath='{.items[0].metadata.name}') &&
-    kubectl cp ./vaultwardenData/. vaultwarden/$PODNAME:/data/ &&
-    kubectl logs -f -l name=vaultwarden-seeder
+    sh init.sh
     ```
 1. Vaultwarden can now be deployed, EG `argocd app sync vaultwarden`

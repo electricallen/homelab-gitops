@@ -1,7 +1,7 @@
 defaultValues.yaml
 tools/bootstrap/values.yaml
 tools/vaultwardenVolumeInit/secrets.yaml
-*vaultwardenData/*
-*nextcloud-sqlbkp*
-*config.php
-*config.php*
+tools/vaultwardenVolumeInit/vaultwardenData/*
+tools/nextcloudVolumeInit/nextcloud-sqlbkp*
+config.php
+config.php*

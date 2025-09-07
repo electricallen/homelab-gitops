@@ -91,7 +91,7 @@ Here is a diagram outlining how traffic flows to pods:
 
 ![](docs/networking.svg)
 
-My HA Proxy config consists of a single `ssl/https` type front end that uses a single backend. That backend uses a `basic` check with `source` load balancing to select between 3 servers, each with encrypt on and SSL checks off. Most other settings are left default or disabled. 
+My HA Proxy config consists of a single `ssl/https` type front end that uses a single backend. That backend uses a `basic` check with `source` load balancing to select between 3 servers, each with encrypt on and SSL checks off. Using a `Stick-table expire` of `5m` helps cutting back to healthy nodes quickly. Most other settings are left default or disabled. 
 
 ### Repo Structure
 
@@ -185,8 +185,9 @@ This repo does not cover host OS-level setup, including disk management. The ste
     sudo mount -a
     ```
 * In Longhorn GUI, `Node` tab, Operation menu on right, `Edit Node and Disks`, add disk at bottom
-    * Use `Block` disk type
+    * Use `File System` disk type
     * Use the mount point `/mnt/longhorn` NOT `/dev/sdb`
+    * Enable scheduling
 
 ## Appendix B: Expanding volumes 
 

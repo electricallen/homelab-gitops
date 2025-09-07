@@ -66,6 +66,10 @@ The remaining steps will vary depending on if backups are available
         ```sh
         ansible-playbook -i inventory.yml playbooks/site.yml --ask-vault-pass -e @vault-globals.yml
         ```
+1. For high-availability, scale the `traefik` deployment:
+    ```sh
+    kubectl scale deployment -n kube-system traefik --replicas 3
+    ```
 1. Install ArgoCD on the cluster with Helm
     ```sh
     helm repo add argo https://argoproj.github.io/argo-helm
@@ -82,13 +86,14 @@ The remaining steps will vary depending on if backups are available
     ```sh
     helm template tools/bootstrap | kubectl apply -f -
     ```
-1. Connect to the ArgoCD GUI and sync the Longhorn application. You may have to sync a couple times to get a healthy result.
+1. Connect to the ArgoCD GUI
     ```sh
     kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
     # Note the admin password
     kubectl port-forward service/argocd-server -n argocd 8080:443
     # open the browser on http://localhost:8080 and accept the certificate
     ```
+1. From the ArgoCD GUI, sync the Longhorn application. It may take a couple of minutes for the resources to become available to sync, and it may require two syncs to see a healthy result. 
 > [!NOTE]
 > At this point, the install process has completed. For migration and disaster recovery, continue to the Restoring from Backups section. For new deployments, skip to the First Time Installation section below
 
@@ -117,7 +122,13 @@ The [vaultwardenVolumeInit](../vaultwardenVolumeInit/README.md) and [nextcloudVo
     # Note oldest running replicaset name
     kubectl -n gitea delete rs <replicaSetName>
     ```
-1. Sync the app-of-apps application, then each nested application
+1. Refresh, then sync the app-of-apps application
+1. You can now sync each application. I recommend this order in order to restore functionality quickly:
+    * ESO and ESO manifests - you may have to set prune and replace in order to get a healthy sync
+    * Vaultwarden - if you are migrating, see [the volume initialization tool](../vaultwardenVolumeInit/README.md)
+    * cert-manager
+    * Everything else
+1. Once cert-manager is synced you can inspect the `cert`, `order`, and `challenge` resources, EG `kubectl get cert -A`, to check on how TLS issuing is progressing.
 
 ### First Time Setup 
 
