@@ -24,7 +24,7 @@ Data is copied with a `rysnc <user>@<host>:<path> nextcloud/PODNAME:/var/www/htm
     DBUSER=nextcloud
     DBPASSWORD=someStrongPassword!
     docker exec --user www-data nextcloud php occ maintenance:mode --on
-    docker exec nextcloud-db mariadb-dump --single-transaction -h localhost -u $nextcloud -p$DBPASSWORD nextcloud > ~/nextcloud/db/nextcloud-sqlbkp.bak
+    docker exec nextcloud-db mariadb-dump --single-transaction -h localhost -u$DBUSER -p$DBPASSWORD nextcloud > ~/nextcloud/db/nextcloud-sqlbkp.bak
     docker exec --user www-data nextcloud php occ maintenance:mode --off
     ```
 **NOTE**: MariaDB > v11 no longer ships with `mysqldump`. Use `mariadb-dump` to take backups, and `mariadb` to restore them on newer versions. For older versions of MariaDB, use `mysqldump` and `mysql` commands. 
