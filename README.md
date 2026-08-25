@@ -21,14 +21,16 @@ This project stems from a desire to graduate from a Docker-compose based homelab
 
 ### Software Components
 
-* [k3s](https://k3s.io/): Kubernetes distribution, deployed on three server nodes
+* [k3s](https://k3s.io/): Kubernetes distribution, deployed on three server nodes using [Ansible](https://docs.ansible.com/) via the excellent [k3s-ansible](https://github.com/k3s-io/k3s-ansible)
 * [ArgoCD](https://argo-cd.readthedocs.io/en/stable/): Continuous Delivery tool for Kubernetes
 * [Gitea](https://about.gitea.com/): Selfhosted Git server, acting as the GitOps source of truth
 * [External Secrets Operator](https://external-secrets.io/latest/): Creates Kubernetes secrets from vault
 * [Vaultwarden](https://github.com/dani-garcia/vaultwarden): Community Bitwarden server, used as secrets vault and as user-facing application
 * [Longhorn](https://longhorn.io/): Distributed block storage for HA of volumes on local nodes and remote backups on [Backblaze B2](https://www.backblaze.com/cloud-storage)
 * [cert-manager](https://cert-manager.io/): TLS certificate management leveraging [Traefik](https://traefik.io/traefik) and [LetsEncrypt](https://letsencrypt.org/) to automatically issue signed certificates to applications
-* [Ansible](https://docs.ansible.com/) is used to deploy k3s via the excellent [k3s-ansible](https://github.com/k3s-io/k3s-ansible)
+* [kube-vip](https://kube-vip.io/) for a high availability control plane
+* [MetalLB](https://metallb.io/) for a high availability data plane
+* [Jenkins](https://www.jenkins.io/) for CI
 * [NextCloud](https://nextcloud.com/): Cloud file storage. Shown here as an example of a user-facing application that can be deployed using the above infrastructure
 
 The Kubernetes resources above are deployed as a self-referential set of [ArgoCD applications](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/). That is, the Kubernetes manifest and Helm Values for the infrastructure is stored in the same repo that is used to deploy applications. As an example, changes to ArgoCD state can be acheived by editing files in the `argocd/` directory of this repo, pushing the update to Gitea, then deploying using ArgoCD itself.  
@@ -37,7 +39,7 @@ The Kubernetes resources above are deployed as a self-referential set of [ArgoCD
 
 This repo is stored on the Kubernetes-hosted Gitea server. Updates to that repo trigger ArgoCD to update Applications, which are in turn deployed to the cluster. Stated another way, the state of this repo on Gitea represents the state of applications in the cluster. 
 
-An [app-of-apps](https://argo-cd.readthedocs.io/en/latest/operator-manual/cluster-bootstrapping/) approach is taken here, where the helm chart in `apps/` is used to generate `application` manifests. Each application folder is a hybrid of upstream helm chart `values.yaml` files and raw manifests. 
+An [app-of-apps](https://argo-cd.readthedocs.io/en/latest/operator-manual/cluster-bootstrapping/) approach is taken here, where the helm chart in `argocd/apps/` is used to generate `application` manifests. Each application folder is a hybrid of upstream helm chart `values.yaml` files and raw manifests. 
 
 As an example, the following diagram shows how to change the configuration for the Vaultwarden vault:
 
@@ -83,34 +85,33 @@ My physical cluster is composed of three machines each running [Proxmox VE](http
 
 ### External Networking
 
-This repo only expects that applications can be routed to based on their FQDN on port 443. However, single DNS entries are insufficient to ensure traffic is routed correctly when a node fails. If HA is a requirement, steps must be taken outside the cluster to ensure DNS is resilient to node failures. 
+Single DNS entries are insufficient to ensure traffic is routed correctly when a node fails. For HA in networking, steps must be taken ensure DNS is resilient to node failures. 
 
-My approach was to leverage the HAProxy package in pfSense to load balance between my three nodes. I would have rather used Traefik here - HA proxy and its pfSense GUI are comparatively difficult to navigate. However, keeping DNS management where it already exists within pfSense was very appealing to me from a maintenance perspective. One drawback with this approach is that a DNS entry must be manually added to pfSense each time a new ingress is created. 
+[kube-vip](https://kube-vip.io/) is installed as a daemonset directly on each node, and creates a single virtual IP address for all data plane communications using Layer 2/ARP mode. 
 
-Here is a diagram outlining how traffic flows to pods:
-
-![](docs/networking.svg)
-
-My HA Proxy config consists of a single `ssl/https` type front end that uses a single backend. That backend uses a `basic` check with `source` load balancing to select between 3 servers, each with encrypt on and SSL checks off. Using a `Stick-table expire` of `5m` helps cutting back to healthy nodes quickly. Most other settings are left default or disabled. 
+[MetalLB](https://metallb.io/) is managed as an application in ArgocCD, and creates an IP address pool for services. Since all services flow through Traefik, functionally only one IP address is consumed. 
 
 ### Repo Structure
 
-Most directories in this repository house application configurations (Helm `values.yaml` and raw Kubernetes manifests). Utilities for installation, data initialization, and disaster recovery are stored in `tools/`. 
+Most directories under `argocd/` house application configurations (Helm `values.yaml` and raw Kubernetes manifests). Utilities for installation, data initialization, and disaster recovery are stored in `tools/`. 
 
 ```sh
-├── apps                        # App-of-apps application configs
-├── argocd                      # ArgoCD application configs
-├── cert-manager                # cert-manager application configs
+├── argocd
+│   ├── apps                    # App-of-apps application configs
+│   ├── cert-manager            # cert-manager application configs
+│   ├── external-secrets        # ESO application configs
+│   ├── gitea                   # Gitea application configs
+│   ├── harbor                  # Harbor application configs
+│   ├── ignition                # Ignition application configs
+│   ├── jenkins                 # Jenkins application configs
+│   ├── longhorn                # Longhorn application configs
+│   ├── metallb                 # MetalLB application configs
+│   ├── nextcloud               # NextCloud application configs
+│   ├── traefik                 # Traefik configuration
+│   └── vaultwarden             # Vaultwarden application configs
+├── ansible                     # Node management
 ├── docs                        # Readme assets
-├── external-secrets            # ESO application configs
-├── gitea                       # Gitea application configs
-├── longhorn                    # Longhorn application configs
-├── nextcloud                   # NextCloud application configs
-├── tools
-│   ├── bootstrap               # Installation and disaster recovery Helm chart 
-│   ├── nextcloudVolumeInit     # NextCloud data migration
-│   └── vaultwardenVolumeInit   # Vaultwarden data migration
-└── vaultwarden                 # Vaultwarden application configs
+└── tools                       # Installation and migration tools
 ```
 
 ## Installation
@@ -122,19 +123,19 @@ The [tools](tools/README.md) directory contains several tools for deploying this
 Some applications will require configuration for secrets and ingresses:
 
 * ArgoCD
-    * Edit `global.domain` and `server.ingress.extraTls[0].hosts` in [values.yaml](argocd/values.yaml)
+    * Edit `global.domain` and `server.ingress.extraTls[0].hosts` in [values.yaml](argocd/argocd/values.yaml)
 * Cert-manager
-    * Edit `spec.acme.email` for both issuers in [clusterissuers.yaml](cert-manager/clusterissuers.yaml)
-    * Add the CloudFlare API token secret to Vaultwarden, then update the UUID to match in [externalsecret.yaml](cert-manager/externalsecret.yaml). See the Vaultwarden steps below for details. 
+    * Edit `spec.acme.email` for both issuers in [clusterissuers.yaml](argocd/cert-manager/clusterissuers.yaml)
+    * Add the CloudFlare API token secret to Vaultwarden, then update the UUID to match in [externalsecret.yaml](argocd/cert-manager/externalsecret.yaml). See the Vaultwarden steps below for details. 
 * Gitea
-    * Edit `ingress.hosts[0].host` and `ingress.tls[0].hosts` in [values.yaml](gitea/values.yaml)
+    * Edit `ingress.hosts[0].host` and `ingress.tls[0].hosts` in [values.yaml](argocd/gitea/values.yaml)
 * Longhorn
-    * Edit `ingress.host` and `defaultBackupStore.backupTarget` in [values.yaml](longhorn/values.yaml)
-    * Add the Backblaze secret to Vaultwarden, and update the UUID to match in [externalsecret.yaml](longhorn/externalsecret.yaml). See the Vaultwarden steps below for details.
+    * Edit `ingress.host` and `defaultBackupStore.backupTarget` in [values.yaml](argocd/longhorn/values.yaml)
+    * Add the Backblaze secret to Vaultwarden, and update the UUID to match in [externalsecret.yaml](argocd/longhorn/externalsecret.yaml). See the Vaultwarden steps below for details.
 * Nextcloud
     * Set up Vaultwarden first
     * If you have an existing Nextcloud server, use [tools/nextcloudVolumeInit](tools/nextcloudVolumeInit/README.md) to migrate the data 
-    * Add the Nextcloud admin and database secrets to Vaultwarden, then update the UUID to match in [externalsecrets.yaml](nextcloud/externalsecrets.yaml)
+    * Add the Nextcloud admin and database secrets to Vaultwarden, then update the UUID to match in [externalsecrets.yaml](argocd/nextcloud/externalsecrets.yaml)
 * Vaultwarden
     * If you have an existing Vaultwarden server, use [tools/vaultwardenVolumeInit](tools/nextcloudVolumeInit/README.md) to migrate the data
     * If you are not using the `vaultwardenVolumeInit` tool:
@@ -153,7 +154,7 @@ Some applications will require configuration for secrets and ingresses:
 
 Edits to applications can be made by updating the upstream Helm charts through the `values.yaml` file. I like to inspect the default values, and only include overwrites in the `values.yaml` file. 
 
-For convenience, you can generate the default `values.yaml` file for the exact chart version and store it on disk using the `helm` CLI utility. Longhorn is shown here as an example, using information from [apps/values.yaml](apps/values.yaml)
+For convenience, you can generate the default `values.yaml` file for the exact chart version and store it on disk using the `helm` CLI utility. Longhorn is shown here as an example, using information from [apps/values.yaml](argocd/apps/values.yaml)
 
 ```sh
 helm repo add longhorn https://charts.longhorn.io

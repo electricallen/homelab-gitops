@@ -1,0 +1,8 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: dmz-pool
+  namespace: metallb
+spec:
+  addresses:
+    - 192.168.2.100-192.168.2.200

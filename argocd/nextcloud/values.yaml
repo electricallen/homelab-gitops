@@ -1,5 +1,5 @@
 image:
-  tag: '31.0.8'
+  tag: '34.0.0'
 
 ingress:
   enabled: true
@@ -11,12 +11,12 @@ ingress:
   tls:
     - secretName: nextcloud-tls
       hosts:
-        - nextcloud.mydomain.tld
+        - cloud.mydomain.tld
   path: /
   pathType: Prefix
 
 nextcloud:
-  host: nextcloud.mydomain.tld
+  host: cloud.mydomain.tld
   existingSecret:
     enabled: true
     secretName: nextcloud-admin-credentials
@@ -33,9 +33,6 @@ cronjob:
 persistence:
   enabled: true
   existingClaim: nextcloud-data
-
-internalDatabase:
-  enabled: false
 
 internalDatabase:
   enabled: false

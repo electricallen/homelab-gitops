@@ -1,4 +1,7 @@
-defaultValues.yaml
+*/defaultValues.yaml
+*/default-values.yaml
+argocd/*/defaultValues.yaml
+argocd/*/default-values.yaml
 tools/bootstrap/values.yaml
 tools/vaultwardenVolumeInit/secrets.yaml
 tools/vaultwardenVolumeInit/vaultwardenData/*

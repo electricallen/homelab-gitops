@@ -1,7 +1,10 @@
+
+image:
+  tag: 1.37.1
 signupsAllowed: false
 invitationsAllowed: true
 
-domain: http://vaultwarden.mydomain.tld
+domain: http://vault.mydomain.tld
 
 storage:
   existingVolumeClaim:
@@ -20,6 +23,6 @@ ingress:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
   tls: true
   tlsSecret: vaultwarden-tls
-  hostname: vaultwarden.mydomain.tld
+  hostname: vault.mydomain.tld
   path: /
   pathType: Prefix
