@@ -59,7 +59,7 @@ In the existing environment:
     ```sh
     kubectl apply -f secrets.yaml
     ```
-1. Place backup data at `./vaultwardenData`. If this is on another server somewhere, you could retrieve it with EG `scp -r user@your.server.example.com:/path/to/data ./vaultwardenData`
+1. Place backup data at `./vaultwardenData`. If this is on another server somewhere, you could retrieve it with EG `mkdir vaultwardenData && scp -r user@your.server.example.com:/path/to/data ./vaultwardenData/`
 1. Execute the tool
     ```sh
     sh init.sh

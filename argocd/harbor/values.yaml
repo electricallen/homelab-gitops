@@ -1,0 +1,62 @@
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: secret
+    secret:
+      secretName: harbor-tls
+  ingress:
+    hosts:
+      core: containers.mydomain.tld
+    className: traefik
+    annotations:
+      spec.ingressClassName: traefik
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+
+externalURL: https://containers.mydomain.tld
+
+persistence:
+  enabled: true
+  resourcePolicy: "keep"
+  persistentVolumeClaim:
+    registry:
+      existingClaim: ""
+      storageClass: longhorn
+      size: 5Gi
+    jobservice:
+      jobLog:
+        existingClaim: ""
+        storageClass: longhorn
+        size: 1Gi
+    database:
+      existingClaim: ""
+      storageClass: longhorn
+      size: 1Gi
+    redis:
+      existingClaim: ""
+      storageClass: longhorn
+      size: 1Gi
+    trivy:
+      existingClaim: ""
+      storageClass: longhorn
+      size: 5Gi
+  imageChartStorage:
+    type: filesystem
+    filesystem:
+      rootdirectory: /storage
+      #maxthreads: 100
+
+existingSecretAdminPassword: harbor-admin-credentials
+existingSecretAdminPasswordKey: password
+existingSecretSecretKey: harbor-core
+
+core:
+  existingSecret: harbor-core
+  secretName: harbor-core
+  existingXsrfSecret: harbor-core
+  existingXsrfSecretKey: CSRF_KEY
+
+ipFamily:
+  ipv6:
+    enabled: false

@@ -129,7 +129,7 @@ spec:
           name: bitwarden-login
           kind: ClusterSecretStore
       remoteRef:
-        key: aaaabbbb-cccc-dddd-eeee-000011112222
+        key: 7c38c07f-6ef8-4498-8e06-fdb175f7801c
         property: username
     - secretKey: password
       sourceRef:
@@ -137,7 +137,7 @@ spec:
           name: bitwarden-login
           kind: ClusterSecretStore
       remoteRef:
-        key: aaaabbbb-cccc-dddd-eeee-000011112222
+        key: 7c38c07f-6ef8-4498-8e06-fdb175f7801c
         property: password
     - secretKey: host
       sourceRef:
@@ -145,7 +145,7 @@ spec:
           name: bitwarden-fields
           kind: ClusterSecretStore
       remoteRef:
-        key: aaaabbbb-cccc-dddd-eeee-000011112222
+        key: 7c38c07f-6ef8-4498-8e06-fdb175f7801c
         property: host
     - secretKey: path
       sourceRef:
@@ -153,7 +153,7 @@ spec:
           name: bitwarden-fields
           kind: ClusterSecretStore
       remoteRef:
-        key: aaaabbbb-cccc-dddd-eeee-000011112222
+        key: 7c38c07f-6ef8-4498-8e06-fdb175f7801c
         property: path
 ---
 # DATABASE VOLUME

@@ -5,21 +5,37 @@ config:
     source:
       repoURL: http://gitea-http.gitea.svc:3000/gitea_admin/homelab-gitops.git
       targetRevision: HEAD
+    syncPolicy:
+      syncOptions:
+        - CreateNamespace=true
+      automated:
+        enabled: true
+        prune: true
+        selfHeal: true
 
 applications:
 # Raw manifests or local Helm charts
   - name: cert-manager-manifests
     namespace: cert-manager
-    path: cert-manager
+    path: argocd/cert-manager
   - name: longhorn-manifests
     namespace: longhorn-system 
-    path: longhorn
+    path: argocd/longhorn
   - name: external-secrets-manifests
     namespace: vaultwarden
-    path: external-secrets
+    path: argocd/external-secrets
   - name: nextcloud-manifests
     namespace: nextcloud
-    path: nextcloud
+    path: argocd/nextcloud
+  - name: jenkins-manifests
+    namespace: jenkins
+    path: argocd/jenkins
+  - name: harbor-manifests
+    namespace: harbor
+    path: argocd/harbor
+  - name: metallb-manifests
+    namespace: metallb-system
+    path: argocd/metallb
 # External Helm chart + Local values; specifying `sources` will create a multi-source application 
 #   https://argo-cd.readthedocs.io/en/latest/user-guide/multiple_sources/
   - name: argocd
@@ -36,7 +52,7 @@ applications:
     sources:
       - repoURL: 'https://dl.gitea.com/charts/'
         chart: gitea
-        targetRevision: 12.1.2
+        targetRevision: 12.5.0
   - name: longhorn
     namespace: longhorn-system
     sources:
@@ -63,3 +79,18 @@ applications:
       - repoURL: 'https://electricallen.github.io/ignition-helm'
         chart: ignition
         targetRevision: 0.1.10
+  - name: jenkins
+    sources:
+      - repoURL: 'https://charts.jenkins.io'
+        chart: jenkins
+        targetRevision: 5.9.26
+  - name: harbor
+    sources:
+      - repoURL: 'https://helm.goharbor.io'
+        chart: harbor
+        targetRevision: 1.19.1
+  - name: metallb
+    sources:
+      - repoURL: 'https://metallb.github.io/metallb'
+        chart: metallb
+        targetRevision: 0.16.1 

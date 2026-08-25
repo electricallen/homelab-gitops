@@ -1,0 +1,17 @@
+---
+# HelmChartConfig allows injection of values into k3s-managed Helm charts
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    service:
+      spec:
+        loadBalancerIP: 192.168.2.100
+        ipFamilyPolicy: SingleStack
+        ipFamilies:
+          - IPv4
+      annotations:
+        metallb.universe.tf/address-pool: dmz-pool

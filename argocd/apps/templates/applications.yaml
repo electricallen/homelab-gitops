@@ -18,7 +18,7 @@ spec:
     {{- if not .helm }}
       helm:
         valueFiles:
-        - $values/{{ .name }}/values.yaml
+        - $values/argocd/{{ .name }}/values.yaml
     {{- end }}
     - repoURL: 'http://gitea-http.gitea.svc:3000/gitea_admin/homelab-gitops.git'
       targetRevision: HEAD
@@ -35,8 +35,8 @@ spec:
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
-    # automated:
-      # prune: true
-      # selfHeal: true
+    automated:
+      prune: true
+      selfHeal: true
 ---
 {{ end -}}

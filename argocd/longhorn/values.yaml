@@ -1,7 +1,7 @@
 ingress:
   enabled: true
   ingressClassName: traefik
-  host: longhorn.wolffmiller.com
+  host: longhorn.mydomain.tld
   tls: true
   secureBackends: false
   tlsSecret: longhorn-tls
@@ -20,5 +20,5 @@ defaultSettings:
   nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
 
 defaultBackupStore:
-  backupTarget: s3://longhorn-backups-wolffmiller@region/longhorn
+  backupTarget: s3://mybucket-name@region/longhorn
   backupTargetCredentialSecret: longhorn-backblaze-credentials
