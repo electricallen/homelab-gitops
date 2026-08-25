@@ -1,0 +1,18 @@
+---
+- name: Provision K3s
+  ansible.builtin.import_playbook: k3s.orchestration.site
+
+- name: Install kube-vip manifest
+  hosts: "{{ groups['server'][0] }}"
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Render kube-vip manifests
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "/var/lib/rancher/k3s/server/manifests/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        owner: root
+        group: root
+        mode: '0600'
+      with_fileglob:
+        - "{{ playbook_dir }}/templates/*.yaml.j2"

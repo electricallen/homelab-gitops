@@ -1,0 +1,3 @@
+# Contains the content:
+# ansible_become_password: root-password-for-this-node-heree
+# See README for details on configuring ansible vault files
