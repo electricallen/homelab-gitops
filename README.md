@@ -83,9 +83,9 @@ This repo is designed independent of hardware configuration, and should be compa
 My physical cluster is composed of three machines each running [Proxmox VE](https://proxmox.com/en/products/proxmox-virtual-environment/overview) with one Ubuntu Server VM. Three nodes allows for [High Availability Embedded etcd](https://docs.k3s.io/datastore/ha-embedded), which in turn allows individual nodes to fail gracefully. 
 
 
-### External Networking
+### Networking
 
-Single DNS entries are insufficient to ensure traffic is routed correctly when a node fails. For HA in networking, steps must be taken ensure DNS is resilient to node failures. 
+Single DNS entries are insufficient to ensure traffic is routed correctly when a node fails. Two utilities are used to achieve HA networking: 
 
 [kube-vip](https://kube-vip.io/) is installed as a daemonset directly on each node, and creates a single virtual IP address for all data plane communications using Layer 2/ARP mode. 
 
