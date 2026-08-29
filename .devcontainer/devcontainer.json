@@ -27,11 +27,12 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "redhat.ansible",
+        "davidanson.vscode-markdownlint",
+        "hediet.vscode-drawio",
         "ms-kubernetes-tools.vscode-kubernetes-tools",
         "ms-azuretools.vscode-docker",
+        "redhat.ansible",
         "streetsidesoftware.code-spell-checker",
-        "davidanson.vscode-markdownlint"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
@@ -43,6 +44,13 @@
         }
       }
     }
+  },
+
+  "mounts": [
+    "source=${localEnv:HOME}/.kube,target=/home/vscode/.kube,type=bindk"
+  ],
+  "containerEnv": {
+    "KUBECONFIG": "/home/vscode/.kube/config"
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh"
 }
